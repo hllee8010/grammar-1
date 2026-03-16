@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>에듀케레 분석지 — 도메인·기억</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy: #1a2744;
+  --navy-light: #243460;
+  --gold: #c8a84b;
+  --gold-light: #e8c96b;
+  --bg: #f5f3ee;
+  --white: #ffffff;
+  --text: #1e1e1e;
+  --text-muted: #555;
+  --border: #ddd;
+  --correct: #2a7a3b;
+  --wrong: #c0392b;
+  --blue-tint: #eef2f8;
+  --gold-tint: #fdf8ee;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Noto Sans KR', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── HEADER ── */
+header {
+  background: var(--navy);
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+}
+.logo {
+  font-family: 'Playfair Display', serif;
+  color: var(--gold);
+  font-size: 1.3rem;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+.logo span { color: #fff; font-size: 0.75rem; display: block; letter-spacing: 0.12em; font-family: 'Noto Sans KR', sans-serif; margin-top: 2px; }
+.header-title {
+  color: rgba(255,255,255,0.7);
+  font-size: 0.85rem;
+  border-left: 1px solid rgba(255,255,255,0.2);
+  padding-left: 16px;
+}
+
+/* ── LAYOUT ── */
+.layout {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+/* ── SIDEBAR ── */
+.sidebar {
+  width: 210px;
+  min-width: 210px;
+  background: var(--navy);
+  padding: 20px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.sidebar-label {
+  color: rgba(255,255,255,0.4);
+  font-size: 0.68rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  padding: 0 20px 8px;
+}
+.passage-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 12px 20px;
+  text-align: left;
+  transition: background 0.18s;
+  border-left: 3px solid transparent;
+}
+.passage-btn:hover { background: rgba(255,255,255,0.06); }
+.passage-btn.active {
+  background: rgba(200,168,75,0.15);
+  border-left-color: var(--gold);
+}
+.passage-btn .pid {
+  color: var(--gold);
+  font-size: 0.7rem;
+  font-family: 'EB Garamond', serif;
+  letter-spacing: 0.06em;
+}
+.passage-btn .ptitle {
+  color: #fff;
+  font-size: 0.82rem;
+  margin-top: 2px;
+  line-height: 1.4;
+}
+.passage-btn.active .ptitle { color: var(--gold-light); }
+
+/* ── MAIN ── */
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ── TABS ── */
+.tabs {
+  background: var(--white);
+  display: flex;
+  border-bottom: 2px solid var(--navy);
+  overflow-x: auto;
+  flex-shrink: 0;
+}
+.tab-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 12px 18px;
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+  transition: color 0.15s, border-color 0.15s;
+}
+.tab-btn:hover { color: var(--navy); }
+.tab-btn.active { color: var(--navy); border-bottom-color: var(--gold); font-weight: 700; }
+
+/* ── CONTENT ── */
+.content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 28px 32px;
+}
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* ── PASSAGE BOX ── */
+.passage-box {
+  background: var(--white);
+  border: 2px solid var(--navy);
+  border-radius: 6px;
+  padding: 20px 24px;
+  margin-bottom: 28px;
+  font-family: 'EB Garamond', serif;
+  font-size: 1.06rem;
+  line-height: 1.85;
+  color: #111;
+}
+.passage-box .label {
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 0.7rem;
+  color: var(--gold);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  font-weight: 700;
+}
+
+/* ── SENTENCE CARDS ── */
+.sent-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-bottom: 18px;
+  overflow: hidden;
+}
+.sent-header {
+  background: var(--blue-tint);
+  border-bottom: 2px solid var(--navy);
+  padding: 12px 16px;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+.sent-num {
+  background: var(--navy);
+  color: var(--gold);
+  font-family: 'Playfair Display', serif;
+  font-size: 0.85rem;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.sent-en {
+  font-family: 'EB Garamond', serif;
+  font-size: 1.05rem;
+  line-height: 1.7;
+  color: #111;
+}
+.sent-body { padding: 14px 16px; }
+.slash-row {
+  background: var(--gold-tint);
+  border-radius: 6px;
+  padding: 10px 14px;
+  margin-bottom: 12px;
+}
+.slash-label {
+  font-size: 0.68rem;
+  color: var(--gold);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.slash-en { font-family: 'EB Garamond', serif; font-style: italic; font-size: 0.97rem; margin-bottom: 4px; color: #333; }
+.slash-ko { font-size: 0.88rem; color: var(--text-muted); }
+.grammar-list { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+.grammar-list li {
+  font-size: 0.84rem;
+  line-height: 1.55;
+  padding-left: 14px;
+  position: relative;
+}
+.grammar-list li::before {
+  content: '▸';
+  position: absolute;
+  left: 0;
+  color: var(--gold);
+}
+.g-label { font-weight: 700; color: var(--navy); }
+.g-ex { font-family: 'EB Garamond', serif; font-style: italic; color: #555; }
+.g-point { color: #c0392b; }
+
+/* ── GRAMMAR SUMMARY ── */
+.gram-item {
+  background: var(--white);
+  border-left: 4px solid var(--gold);
+  border-radius: 0 8px 8px 0;
+  padding: 14px 18px;
+  margin-bottom: 14px;
+}
+.gram-num { color: var(--gold); font-weight: 700; font-size: 0.85rem; }
+.gram-title { color: var(--navy); font-weight: 700; font-size: 0.97rem; margin-bottom: 6px; }
+.gram-evidence { font-family: 'EB Garamond', serif; font-style: italic; font-size: 0.93rem; color: #555; margin-bottom: 4px; }
+.gram-point { font-size: 0.87rem; color: #c0392b; }
+
+/* ── TRANSLATION ── */
+.trans-box {
+  background: var(--gold-tint);
+  border: 2px solid var(--gold);
+  border-radius: 8px;
+  padding: 22px 26px;
+  font-size: 1.0rem;
+  line-height: 2.0;
+  color: #222;
+}
+
+/* ── TOPIC/STRUCTURE ── */
+.topic-grid { display: flex; flex-direction: column; gap: 14px; }
+.topic-row {
+  background: var(--white);
+  border-radius: 8px;
+  padding: 16px 20px;
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  border: 1px solid var(--border);
+}
+.topic-label {
+  background: var(--navy);
+  color: var(--gold);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 4px 10px;
+  border-radius: 4px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.topic-val { font-size: 0.93rem; line-height: 1.65; }
+
+/* ── QUIZ ── */
+.quiz-item {
+  background: var(--white);
+  border-radius: 10px;
+  padding: 20px 22px;
+  margin-bottom: 20px;
+  border: 1px solid var(--border);
+}
+.quiz-header {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 14px;
+  align-items: flex-start;
+}
+.quiz-num {
+  background: var(--navy);
+  color: var(--gold);
+  font-family: 'Playfair Display', serif;
+  font-size: 0.85rem;
+  min-width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.quiz-type {
+  background: var(--blue-tint);
+  color: var(--navy);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 3px 9px;
+  border-radius: 20px;
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+.quiz-q { font-size: 0.92rem; line-height: 1.7; white-space: pre-wrap; }
+.choices { display: flex; flex-direction: column; gap: 7px; }
+.choice-btn {
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: 6px;
+  padding: 9px 14px;
+  cursor: pointer;
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 0.88rem;
+  text-align: left;
+  transition: border-color 0.15s, background 0.15s;
+  line-height: 1.5;
+}
+.choice-btn:hover:not(.answered) { border-color: var(--navy); background: var(--blue-tint); }
+.choice-btn.correct {
+  background: #e8f8ed;
+  border-color: var(--correct);
+  color: var(--correct);
+  font-weight: 700;
+}
+.choice-btn.wrong {
+  background: #fdecea;
+  border-color: var(--wrong);
+  color: var(--wrong);
+}
+.choice-btn.answered { cursor: default; }
+.quiz-explanation {
+  display: none;
+  margin-top: 10px;
+  padding: 10px 14px;
+  background: #fff8e1;
+  border-left: 3px solid var(--gold);
+  border-radius: 0 6px 6px 0;
+  font-size: 0.85rem;
+  color: #555;
+  line-height: 1.55;
+}
+.quiz-explanation.visible { display: block; }
+.reset-btn {
+  margin-top: 10px;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 5px 12px;
+  font-size: 0.78rem;
+  cursor: pointer;
+  color: var(--text-muted);
+  font-family: 'Noto Sans KR', sans-serif;
+}
+.reset-btn:hover { border-color: var(--navy); color: var(--navy); }
+
+/* ── WRITTEN ── */
+.written-item {
+  background: var(--white);
+  border-radius: 10px;
+  padding: 20px 22px;
+  margin-bottom: 18px;
+  border: 1px solid var(--border);
+}
+.written-type {
+  display: inline-block;
+  background: var(--gold);
+  color: var(--navy);
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 20px;
+  margin-bottom: 10px;
+}
+.written-q { font-size: 0.92rem; line-height: 1.75; margin-bottom: 8px; white-space: pre-wrap; }
+.written-cond { font-size: 0.8rem; color: var(--text-muted); font-style: italic; margin-bottom: 14px; }
+.answer-lines { border-bottom: 1.5px solid #bbb; padding-bottom: 10px; margin-bottom: 8px; min-height: 40px; }
+.answer-lines + .answer-lines { margin-top: 8px; }
+
+/* ── ANSWER KEY ── */
+.ans-block {
+  background: var(--white);
+  border-radius: 10px;
+  padding: 22px 24px;
+  margin-bottom: 18px;
+  border: 1px solid var(--border);
+}
+.ans-subtitle {
+  font-size: 0.78rem;
+  color: var(--gold);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.model-answer {
+  background: var(--gold-tint);
+  border-left: 4px solid var(--gold);
+  border-radius: 0 8px 8px 0;
+  padding: 14px 18px;
+  margin-bottom: 12px;
+}
+.model-answer .wtype { font-size: 0.75rem; font-weight: 700; color: var(--navy); margin-bottom: 6px; }
+.model-answer .answer { font-size: 0.95rem; color: #c0392b; font-weight: 700; line-height: 1.65; }
+
+/* ── SECTION TITLE ── */
+.section-title {
+  color: var(--navy);
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin-bottom: 18px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--gold);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.section-title::before {
+  content: '';
+  display: block;
+  width: 4px;
+  height: 18px;
+  background: var(--gold);
+  border-radius: 2px;
+}
+
+/* ── KEYWORD TABLE ── */
+.kw-table { width: 100%; border-collapse: collapse; margin-bottom: 24px; }
+.kw-table th {
+  background: var(--navy);
+  color: var(--gold);
+  padding: 10px 14px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-align: left;
+}
+.kw-table td {
+  padding: 9px 14px;
+  font-size: 0.9rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--white);
+}
+.kw-table tr:nth-child(even) td { background: var(--blue-tint); }
+.kw-en { font-family: 'EB Garamond', serif; font-size: 1rem; font-weight: 600; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 700px) {
+  .sidebar { width: 160px; min-width: 160px; }
+  .content { padding: 18px 16px; }
+  .tab-btn { padding: 10px 11px; font-size: 0.75rem; }
+}
+@media (max-width: 520px) {
+  .layout { flex-direction: column; }
+  .sidebar { width: 100%; flex-direction: row; padding: 10px; overflow-x: auto; gap: 8px; }
+  .sidebar-label { display: none; }
+  .passage-btn { padding: 8px 14px; border-left: none; border-bottom: 3px solid transparent; }
+  .passage-btn.active { border-bottom-color: var(--gold); border-left: none; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">에듀케레<span>EDUCARE</span></div>
+  <div class="header-title">영어 지문 분석지 — 도메인·기억 편</div>
+</header>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="sidebar-label">지문 선택</div>
+    <button class="passage-btn active" onclick="selectPassage(0)">
+      <div class="pid">지문 1</div>
+      <div class="ptitle">Domain Names &amp; Cybersquatting</div>
+    </button>
+    <button class="passage-btn" onclick="selectPassage(1)">
+      <div class="pid">지문 2</div>
+      <div class="ptitle">Memory and Travel</div>
+    </button>
+  </nav>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="tabs" id="tabs">
+      <button class="tab-btn active" onclick="selectTab(0)">① 문장분석</button>
+      <button class="tab-btn" onclick="selectTab(1)">② 핵심단어</button>
+      <button class="tab-btn" onclick="selectTab(2)">③ 문법총정리</button>
+      <button class="tab-btn" onclick="selectTab(3)">④ 전문해석</button>
+      <button class="tab-btn" onclick="selectTab(4)">⑤ 주제·구조</button>
+      <button class="tab-btn" onclick="selectTab(5)">⑥ 변형문제</button>
+      <button class="tab-btn" onclick="selectTab(6)">⑦ 서술형</button>
+      <button class="tab-btn" onclick="selectTab(7)">⑧ 정답지</button>
+    </div>
+    <div class="content" id="content">
+      <!-- Rendered by JS -->
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════════════════════════
+// DATA
+// ══════════════════════════════════════════════════════════════════════════════
+const passages = [
+{
+  id: "지문 1",
+  title: "Domain Names & Cybersquatting",
+  full_en: `Since the first web browser was released in 1990, the number of registered websites on the Internet has grown rapidly. Unfortunately, there are only so many simple and available domain names. So, it's become very difficult to find one. Despite the many trillions of possible names for a website, there are a limited number of English words. As of 2000, only about 1,700 one-word English domain names were still available. These are the numbers that have led to "cybersquatting." This is the practice of buying an Internet address with the hope that a well-known company will pay a lot of money for it in the future. For example, American businessman Marc Ostrofsky bought the domain "business.com" for $150,000 in 1996 and sold it for $7.5 million just four years later.`,
+  sentences: [
+    {
+      num:"①", en:"Since the first web browser was released in 1990, the number of registered websites on the Internet has grown rapidly.",
+      slash:"Since the first web browser / was released / in 1990, // the number of registered websites / on the Internet / has grown rapidly.",
+      ko:"1990년에 최초의 웹 브라우저가 출시된 이후로, / 인터넷에 등록된 웹사이트의 수는 / 빠르게 증가해 왔다.",
+      grammar:[
+        {label:"since + 과거시제 → 현재완료", ex:"Since he left, I have been sad.", point:"since(~이래로) + 과거시점 → 주절은 현재완료(has grown)"},
+        {label:"the number of + 복수명사 → 단수동사", ex:"The number of students is large.", point:"a number of(많은) vs. the number of(~의 수): 동사 수 일치 빈출"},
+      ]
+    },
+    {
+      num:"②", en:"Unfortunately, there are only so many simple and available domain names.",
+      slash:"Unfortunately, / there are / only so many / simple and available / domain names.",
+      ko:"안타깝게도, / 간단하고 사용 가능한 도메인 이름은 / 그리 많지 않다.",
+      grammar:[
+        {label:"there are + 복수명사 (존재구문)", ex:"There are many options.", point:"there is/are 구문에서 진주어에 따라 수 일치"},
+        {label:"only so many: 한정된 수의 (관용 표현)", ex:"There are only so many hours in a day.", point:"'제한된 수량'을 나타내는 관용 표현"},
+      ]
+    },
+    {
+      num:"③", en:"So, it's become very difficult to find one.",
+      slash:"So, / it's become / very difficult / to find one.",
+      ko:"따라서 / 하나를 찾기가 / 매우 어렵게 되었다.",
+      grammar:[
+        {label:"가주어 it ~ 진주어 to부정사", ex:"It is easy to learn.", point:"it이 형식주어, to find one이 진주어 — 수능 어법 빈출"},
+        {label:"현재완료(결과): has become", ex:"He has become a doctor.", point:"과거 변화의 결과가 현재까지 유지됨"},
+      ]
+    },
+    {
+      num:"④", en:"Despite the many trillions of possible names for a website, there are a limited number of English words.",
+      slash:"Despite / the many trillions of possible names / for a website, // there are / a limited number / of English words.",
+      ko:"웹사이트에 가능한 수조 개의 이름이 있음에도 불구하고, / 영어 단어의 수는 한정되어 있다.",
+      grammar:[
+        {label:"despite + 명사구 (양보 전치사)", ex:"Despite the rain, we went out.", point:"despite/in spite of 뒤에는 명사(구)만 가능 — although/though는 절"},
+        {label:"a limited number of + 복수명사 → 복수동사", ex:"A limited number of seats are available.", point:"a number of처럼 복수 취급"},
+      ]
+    },
+    {
+      num:"⑤", en:"As of 2000, only about 1,700 one-word English domain names were still available.",
+      slash:"As of 2000, / only about 1,700 / one-word English domain names / were still available.",
+      ko:"2000년 기준으로, / 단 약 1,700개의 / 한 단어짜리 영어 도메인 이름만이 / 여전히 이용 가능했다.",
+      grammar:[
+        {label:"as of: ~을 기준으로 (전치사구)", ex:"As of today, the rule applies.", point:"시점 표현 관용 전치사구"},
+        {label:"compound noun: one-word (하이픈)", ex:"a three-hour exam", point:"숫자+명사가 형용사로 쓰일 때 하이픈 연결, 명사는 단수 유지"},
+      ]
+    },
+    {
+      num:"⑥", en:'These are the numbers that have led to "cybersquatting."',
+      slash:'These are / the numbers / that have led to / "cybersquatting."',
+      ko:"이 숫자들이 / '사이버스쿼팅'을 초래한 것이다.",
+      grammar:[
+        {label:"관계대명사 that (선행사: the numbers)", ex:"The book that I read was great.", point:"선행사가 사물 → that/which; lead to + 명사(~를 초래하다)"},
+        {label:"현재완료 have led (결과·연결)", ex:"His efforts have led to success.", point:"과거부터 지금까지의 결과 강조"},
+      ]
+    },
+    {
+      num:"⑦", en:"This is the practice of buying an Internet address with the hope that a well-known company will pay a lot of money for it in the future.",
+      slash:"This is / the practice / of buying an Internet address / with the hope / that a well-known company / will pay a lot of money / for it / in the future.",
+      ko:"이것은 / 유명 회사가 미래에 그것에 큰돈을 지불하기를 기대하며 / 인터넷 주소를 구매하는 관행이다.",
+      grammar:[
+        {label:"동격 that절 (the hope that ~)", ex:"the idea that we should help", point:"hope/idea/fact + that절 동격 — 관계대명사 that과 구별 필수"},
+        {label:"전치사 + 동명사: of buying", ex:"She is thinking of leaving.", point:"전치사 뒤에는 동명사(V-ing), to부정사 불가"},
+      ]
+    },
+    {
+      num:"⑧", en:'For example, American businessman Marc Ostrofsky bought the domain "business.com" for $150,000 in 1996 and sold it for $7.5 million just four years later.',
+      slash:'American businessman Marc Ostrofsky / bought the domain "business.com" / for $150,000 / in 1996 / and sold it / for $7.5 million / just four years later.',
+      ko:"미국 사업가 Marc Ostrofsky는 / 1996년에 'business.com' 도메인을 150,000달러에 구입하여 / 불과 4년 후에 750만 달러에 팔았다.",
+      grammar:[
+        {label:"병렬구조: bought ~ and sold ~", ex:"She came in and sat down.", point:"등위접속사 and로 동일 시제·형태의 동사 연결"},
+        {label:"for + 금액 (교환 가격)", ex:"He sold the car for $5,000.", point:"buy/sell + for + 가격: 교환 가격 표현"},
+      ]
+    },
+  ],
+  keywords: [
+    {word:"domain name", meaning:"도메인 이름 (웹사이트 주소)"},
+    {word:"cybersquatting", meaning:"사이버스쿼팅 (도메인 선점 매매)"},
+    {word:"registered", meaning:"등록된"},
+    {word:"available", meaning:"이용 가능한"},
+    {word:"well-known", meaning:"잘 알려진, 유명한"},
+  ],
+  grammar_summary: [
+    {title:"현재완료(has grown / have led)의 용법", evidence:"the number of registered websites has grown rapidly; have led to cybersquatting", point:"결과·계속 용법. since + 과거시점과 함께 과거에서 현재까지의 변화를 표현"},
+    {title:"the number of vs. a number of (수 일치)", evidence:"the number of registered websites has grown; a limited number of English words are", point:"the number of → 단수, a number of → 복수. 수능·내신 빈출"},
+    {title:"despite + 명사구 (양보 전치사)", evidence:"Despite the many trillions of possible names", point:"despite/in spite of 뒤에는 명사(구)만 가능. although/even though는 절"},
+    {title:"동격의 that절", evidence:"with the hope that a well-known company will pay a lot of money", point:"hope, fact, idea 등 추상명사 + that절 동격. 관계대명사 that과 다름"},
+    {title:"가주어 it ~ 진주어 to부정사", evidence:"it's become very difficult to find one", point:"it은 형식주어, to find one이 진주어. 수능 어법 출제 빈출"},
+  ],
+  full_translation:"1990년에 최초의 웹 브라우저가 출시된 이후로, 인터넷에 등록된 웹사이트의 수는 빠르게 증가해 왔다. 안타깝게도, 간단하고 사용 가능한 도메인 이름은 그리 많지 않다. 따라서 하나를 찾기가 매우 어렵게 되었다. 웹사이트에 사용 가능한 수조 개의 이름이 있음에도 불구하고, 영어 단어의 수는 한정되어 있다. 2000년 기준으로, 단 약 1,700개의 한 단어짜리 영어 도메인 이름만이 여전히 이용 가능했다. 이 숫자들이 '사이버스쿼팅'을 초래한 것이다. 이것은 유명 회사가 미래에 그것에 큰돈을 지불하기를 기대하며 인터넷 주소를 구매하는 관행이다. 예를 들어, 미국 사업가 Marc Ostrofsky는 1996년에 'business.com' 도메인을 150,000달러에 구입하여 불과 4년 후에 750만 달러에 팔았다.",
+  topic:"도메인 이름 부족과 사이버스쿼팅의 등장",
+  main_idea:"인터넷 도메인 이름의 수가 제한되면서 사이버스쿼팅이라는 관행이 생겨났다.",
+  structure:"현상 제시(도메인 이름 부족) → 원인 분석(영어 단어 수 한정) → 결과(사이버스쿼팅 등장) → 구체적 사례(Marc Ostrofsky)",
+  questions: [
+    {type:"주제추론", q:"다음 글의 주제로 가장 적절한 것은?", choices:["the history of web browser development","difficulties in finding available domain names and the rise of cybersquatting","how American businessmen profit from the Internet","the importance of using simple English words for websites","reasons why the Internet has grown rapidly since 1990"], answer:2, expl:"도메인 이름 부족(available domain names)과 사이버스쿼팅의 등장이 글 전체의 핵심 흐름"},
+    {type:"빈칸추론", q:"다음 빈칸에 들어갈 말로 가장 적절한 것은?\n\nThis is the practice of buying an Internet address with the hope that a well-known company will ______ for it in the future.", choices:["register a new domain name","develop advanced web browsers","pay a large sum of money","donate to Internet charities","create a popular website"], answer:3, expl:"사이버스쿼팅의 목적: 유명 기업이 '많은 돈을 지불(pay a large sum of money)'하기를 기대"},
+    {type:"어법오류", q:"다음 밑줄 친 부분 중 어법상 틀린 것은?\n\nSince the first web browser was released in 1990, ① the number of registered websites has grown rapidly. ② Despite the many trillions of possible names, there are a limited number of English words. This is the practice of buying an address ③ with the hope that a company will pay a lot. Marc Ostrofsky bought the domain ④ for $150,000 and sold it for $7.5 million. These are the numbers that ⑤ have led to cause cybersquatting.", choices:["①","②","③","④","⑤"], answer:5, expl:"⑤ have led to cause → have led to cybersquatting. lead to 뒤에는 명사(구)가 오며, cause는 불필요"},
+    {type:"내용불일치", q:"다음 글의 내용과 일치하지 않는 것은?", choices:["첫 번째 웹 브라우저는 1990년에 출시되었다.","2000년 기준으로 약 1,700개의 한 단어 영어 도메인이 남아 있었다.","Marc Ostrofsky는 1996년에 business.com을 구매했다.","Marc Ostrofsky는 도메인을 구입가보다 낮은 가격에 팔았다.","사이버스쿼팅은 도메인 이름 부족과 관련이 있다."], answer:4, expl:"④ 15만 달러에 사서 750만 달러에 팔았으므로 구입가보다 훨씬 높은 가격"},
+    {type:"글의순서", q:"주어진 글 다음에 이어질 글의 순서로 가장 적절한 것은?\n\nUnfortunately, there are only so many simple and available domain names.\n\n(A) These are the numbers that have led to 'cybersquatting.'\n(B) As of 2000, only about 1,700 one-word English domain names were still available.\n(C) Despite the many trillions of possible names, there are a limited number of English words.", choices:["(A)-(B)-(C)","(B)-(C)-(A)","(C)-(B)-(A)","(C)-(A)-(B)","(B)-(A)-(C)"], answer:3, expl:"C(원인: 영어 단어 한정) → B(구체 수치 제시) → A(결과: 사이버스쿼팅) 순이 논리적"},
+  ],
+  written_q: [
+    {type:"빈칸요약", q:"다음 글을 읽고 빈칸 (A)와 (B)에 들어갈 말을 본문에서 찾아 쓰시오.\n\n인터넷 도메인 이름의 수가 ( A ) 되면서, 유명 기업이 큰돈을 지불할 것을 기대하며 도메인 이름을 미리 구입하는 ( B ) 관행이 생겨났다.", cond:"(A), (B) 각각 영어 단어 1개로 쓸 것", model_answer:"(A) limited  /  (B) cybersquatting"},
+    {type:"서술형", q:"Marc Ostrofsky가 'business.com'으로 거둔 경제적 성과를 구체적인 수치를 포함하여 우리말로 서술하시오.", cond:"40자 내외로 쓸 것", model_answer:"Marc Ostrofsky는 1996년에 business.com을 15만 달러에 구입하여 4년 후 750만 달러에 팔았다."},
+  ]
+},
+
+// ══════ PASSAGE 2 ══════
+{
+  id: "지문 2",
+  title: "Memory and Travel",
+  full_en: `I now travel so much for my work that I sometimes cannot remember where I've been or when. I went recently to Oslo, Norway to speak at a conference. As I was getting ready to go on stage, one of the organizers asked me if this was my first visit to Oslo. I told her confidently that it was. A few hours later, I remembered that I have been in Oslo before for a week! Admittedly it was about fifteen years earlier, but in a week, you do all kinds of things: eat, shower, meet people, and talk and think about Norwegian things. I'd been to the National Art Gallery and spent time looking at paintings. They were by Edward Munch, and included The Scream. I wanted to scream like the character in that painting when I realized I'd forgotten the entire trip. It may be a sign that I should stop traveling so much.`,
+  sentences: [
+    {
+      num:"①", en:"I now travel so much for my work that I sometimes cannot remember where I've been or when.",
+      slash:"I now travel / so much / for my work / that I sometimes cannot remember / where I've been / or when.",
+      ko:"나는 이제 일 때문에 너무 많이 여행을 해서 / 내가 어디에 갔었는지 또는 언제인지 / 때때로 기억하지 못한다.",
+      grammar:[
+        {label:"so ~ that ... (결과의 부사절)", ex:"He ran so fast that I couldn't catch him.", point:"so + 형용사/부사 + that + 결과절. 정도가 심해 결과가 발생"},
+        {label:"간접의문문: where I've been", ex:"I don't know where he went.", point:"의문사 + 주어 + 동사 어순. 직접의문문과 어순 혼동 주의"},
+      ]
+    },
+    {
+      num:"②", en:"I went recently to Oslo, Norway to speak at a conference.",
+      slash:"I went recently / to Oslo, Norway / to speak / at a conference.",
+      ko:"나는 최근 / 회의에서 연설하기 위해 / 노르웨이 오슬로에 갔다.",
+      grammar:[
+        {label:"to부정사의 목적 용법 (to speak)", ex:"She went to the library to study.", point:"to부정사가 동사 뒤에서 목적(~하기 위해)을 나타냄"},
+        {label:"부사 recently의 위치", ex:"He recently moved to Seoul.", point:"빈도·시간부사는 일반동사 앞 또는 문장 끝에 위치 가능"},
+      ]
+    },
+    {
+      num:"③", en:"As I was getting ready to go on stage, one of the organizers asked me if this was my first visit to Oslo.",
+      slash:"As I was getting ready / to go on stage, // one of the organizers / asked me / if this was my first visit / to Oslo.",
+      ko:"내가 무대에 오를 준비를 하고 있을 때, / 주최자 중 한 명이 / 오슬로 방문이 처음인지 / 내게 물었다.",
+      grammar:[
+        {label:"as (시간 접속사): ~할 때", ex:"As she entered, everyone clapped.", point:"as는 시간/이유/양보 등 다양한 의미 — 문맥 파악 필수"},
+        {label:"asked + 목적어 + if절 (간접의문문)", ex:"She asked if I was ready.", point:"if/whether 간접의문문: 주어 + 동사 어순 유지"},
+      ]
+    },
+    {
+      num:"④", en:"I told her confidently that it was.",
+      slash:"I told her / confidently / that it was.",
+      ko:"나는 자신 있게 / 그렇다고 그녀에게 말했다.",
+      grammar:[
+        {label:"4형식 → that절: told + 목적어 + that절", ex:"He told me that he was leaving.", point:"tell + 간접목적어 + that절 (say와 달리 간접목적어 필수)"},
+      ]
+    },
+    {
+      num:"③ 어법오류", en:"A few hours later, I remembered that I have been in Oslo before for a week!",
+      slash:"A few hours later, / I remembered / that I have been(→had been) / in Oslo / before / for a week!",
+      ko:"몇 시간 후, / 나는 전에 일주일간 / 오슬로에 있었다는 것을 / 기억해냈다!",
+      grammar:[
+        {label:"⚠️ have been → had been (시제 일치 오류)", ex:"She said that she had finished.", point:"주절 과거(remembered) → 종속절도 과거완료(had been)으로 시제 일치. have been은 오류"},
+      ]
+    },
+    {
+      num:"⑥", en:"Admittedly it was about fifteen years earlier, but in a week, you do all kinds of things: eat, shower, meet people, and talk and think about Norwegian things.",
+      slash:"Admittedly / it was about fifteen years earlier, // but in a week, / you do / all kinds of things: / eat, shower, meet people, / and talk and think / about Norwegian things.",
+      ko:"인정컨대 그것은 약 15년 전이었지만, / 일주일 안에, / 당신은 온갖 종류의 일을 한다: / 먹고, 샤워하고, 사람들을 만나고, / 노르웨이 것들에 대해 이야기하고 생각한다.",
+      grammar:[
+        {label:"콜론(:) 뒤 예시 열거", ex:"I need: milk, eggs, and butter.", point:"콜론 뒤 구체적 예시 나열. 등위접속사 and로 병렬"},
+        {label:"병렬구조: eat, shower, meet, talk, think", ex:"She likes singing, dancing, and acting.", point:"and로 연결되는 동사원형의 병렬 구조"},
+      ]
+    },
+    {
+      num:"⑦", en:"I'd been to the National Art Gallery and spent time looking at paintings.",
+      slash:"I'd been / to the National Art Gallery / and spent time / looking at paintings.",
+      ko:"나는 국립 미술관에 갔었고 / 그림을 감상하며 / 시간을 보냈다.",
+      grammar:[
+        {label:"spend + 시간 + V-ing: ~하며 시간을 보내다", ex:"He spent an hour reading.", point:"spend + 시간/돈 + (on) 명사 또는 V-ing 형태"},
+        {label:"과거완료(I'd been): 대과거", ex:"She had left before I arrived.", point:"기억하는 시점(과거)보다 이전에 일어난 일이므로 과거완료 사용"},
+      ]
+    },
+    {
+      num:"⑧", en:"They were by Edward Munch, and included The Scream.",
+      slash:"They were / by Edward Munch, / and included / The Scream.",
+      ko:"그것들은 에드바르 뭉크의 작품이었고, / '절규'도 포함되어 있었다.",
+      grammar:[
+        {label:"by + 작가/화가: ~의 작품인", ex:"a novel by Hemingway", point:"by는 창작자 표현에 사용. 수동태의 by(행위자)와 구별"},
+      ]
+    },
+    {
+      num:"⑨", en:"I wanted to scream like the character in that painting when I realized I'd forgotten the entire trip.",
+      slash:"I wanted to scream / like the character / in that painting / when I realized / I'd forgotten / the entire trip.",
+      ko:"나는 그 그림 속 인물처럼 소리를 지르고 싶었다 / 내가 그 여행 전체를 잊었다는 것을 깨달았을 때.",
+      grammar:[
+        {label:"like + 명사: ~처럼 (전치사)", ex:"She sings like a bird.", point:"like는 전치사로 명사(구) 앞에, as는 접속사로 절 앞에"},
+        {label:"과거완료 I'd forgotten (대과거)", ex:"I realized I had lost my key.", point:"realized(과거) 시점보다 먼저 잊어버린 것이므로 과거완료"},
+      ]
+    },
+    {
+      num:"⑩", en:"It may be a sign that I should stop traveling so much.",
+      slash:"It may be / a sign / that I should stop / traveling / so much.",
+      ko:"그것은 / 내가 여행을 그렇게 많이 그만해야 한다는 / 신호일지도 모른다.",
+      grammar:[
+        {label:"동격 that절 (a sign that ~)", ex:"It's a sign that things are changing.", point:"sign, fact, idea 등 추상명사 + that절 동격 구조"},
+        {label:"stop + V-ing: ~하는 것을 멈추다", ex:"Stop talking!", point:"stop + V-ing(~하기를 멈추다) vs stop + to부정사(~하기 위해 멈추다) — 수능 빈출"},
+      ]
+    },
+  ],
+  keywords: [
+    {word:"organizer", meaning:"주최자, 조직자"},
+    {word:"confidently", meaning:"자신 있게"},
+    {word:"admittedly", meaning:"인정하건대"},
+    {word:"realized", meaning:"깨달았다"},
+    {word:"entire", meaning:"전체의"},
+  ],
+  grammar_summary: [
+    {title:"so ~ that ... (결과의 부사절)", evidence:"I now travel so much for my work that I sometimes cannot remember", point:"so + 형용사/부사 + that + 결과절 구조. such + a(n) + 형용사 + 명사 + that과 비교"},
+    {title:"시제 일치: 주절 과거 → 종속절 과거완료", evidence:"I remembered that I have been(→ had been) in Oslo before", point:"주절이 과거일 때 종속절은 과거 또는 과거완료 사용. have been은 오류 — ③번 어법 출제 포인트"},
+    {title:"과거완료(had been / I'd forgotten)의 대과거 용법", evidence:"I'd been to the National Art Gallery; I'd forgotten the entire trip", point:"기준 시점(과거)보다 이전에 일어난 일을 표현. 과거완료 = had + p.p."},
+    {title:"stop + V-ing vs. stop + to부정사", evidence:"I should stop traveling so much", point:"stop traveling = 여행하는 것을 그만두다 / stop to travel = 여행하기 위해 멈추다"},
+    {title:"like(전치사) vs. as(접속사)", evidence:"I wanted to scream like the character in that painting", point:"like + 명사(구), as + 절. 비교 표현에서 자주 출제"},
+  ],
+  full_translation:"나는 이제 일 때문에 너무 많이 여행을 해서 때때로 내가 어디에 갔었는지 또는 언제인지 기억하지 못한다. 나는 최근 회의에서 연설하기 위해 노르웨이 오슬로에 갔다. 내가 무대에 오를 준비를 하고 있을 때, 주최자 중 한 명이 오슬로 방문이 처음인지 내게 물었다. 나는 자신 있게 그렇다고 그녀에게 말했다. 몇 시간 후, 나는 전에 일주일간 오슬로에 있었다는 것을 기억해냈다! 인정컨대 그것은 약 15년 전이었지만, 일주일 안에, 당신은 온갖 종류의 일을 한다: 먹고, 샤워하고, 사람들을 만나고, 노르웨이와 관련된 것에 대해 이야기하고 생각하는 것들을. 나는 국립 미술관에 갔었고 그림을 감상하며 시간을 보냈다. 그것들은 에드바르 뭉크의 작품이었고, '절규'도 포함되어 있었다. 나는 그 여행 전체를 잊었다는 것을 깨달았을 때 그 그림 속 인물처럼 소리를 지르고 싶었다. 그것은 내가 여행을 그렇게 많이 그만해야 한다는 신호일지도 모른다.",
+  topic:"과도한 여행으로 인한 기억 상실 경험",
+  main_idea:"너무 많은 여행으로 인해 과거의 방문 경험을 완전히 잊어버리는 일이 생길 수 있다.",
+  structure:"상황 제시(잦은 여행으로 기억 혼란) → 구체적 일화(오슬로 방문 망각) → 세부 사항(뭉크 미술관) → 깨달음(경고 신호)",
+  questions: [
+    {type:"주제추론", q:"다음 글의 주제로 가장 적절한 것은?", choices:["the importance of keeping a travel diary","how to enjoy art museums during business trips","forgetting past travel experiences due to excessive travel","the beauty of Norwegian culture and art","tips for giving speeches at international conferences"], answer:3, expl:"잦은 여행(excessive travel)으로 과거 방문 경험을 잊어버리는 것이 주제"},
+    {type:"빈칸추론", q:"다음 빈칸에 들어갈 말로 가장 적절한 것은?\n\nI wanted to scream like the character in that painting when I realized I'd ______ the entire trip.", choices:["planned","enjoyed","forgotten","repeated","described"], answer:3, expl:"오슬로 일주일 여행 전체를 잊었다는 내용 → forgotten"},
+    {type:"어법오류", q:"다음 밑줄 친 부분 중 어법상 틀린 것은?\n\nI now travel so much for my work ① that I sometimes cannot remember where I've been. I went recently to Oslo, Norway ② to speak at a conference. I remembered that I ③ have been in Oslo before for a week! I'd been to the National Art Gallery and spent time ④ looking at paintings. It may be a sign that I should stop ⑤ traveling so much.", choices:["①","②","③","④","⑤"], answer:3, expl:"③ have been → had been. 주절이 과거(remembered)이므로 종속절은 과거완료(had been)로 시제 일치"},
+    {type:"내용불일치", q:"다음 글의 내용과 일치하지 않는 것은?", choices:["필자는 일 때문에 여행을 자주 한다.","필자는 오슬로에서 연설하기 위해 방문했다.","이전 오슬로 방문은 약 15년 전이었다.","필자는 오슬로 국립 미술관에서 모네의 그림을 감상했다.","필자는 이전 오슬로 여행 전체를 잊어버렸다."], answer:4, expl:"④ 모네가 아니라 에드바르 뭉크(Edward Munch)의 그림"},
+    {type:"글의순서", q:"주어진 글 다음에 이어질 글의 순서로 가장 적절한 것은?\n\nAs I was getting ready to go on stage, one of the organizers asked me if this was my first visit to Oslo.\n\n(A) A few hours later, I remembered that I had been in Oslo before for a week!\n(B) I told her confidently that it was.\n(C) I'd been to the National Art Gallery and spent time looking at paintings.", choices:["(A)-(B)-(C)","(B)-(A)-(C)","(C)-(A)-(B)","(A)-(C)-(B)","(C)-(B)-(A)"], answer:2, expl:"B(자신 있게 처음이라 답함) → A(몇 시간 후 기억남) → C(미술관 방문 회상) 순이 자연스러움"},
+  ],
+  written_q: [
+    {type:"빈칸요약", q:"다음 글을 읽고 빈칸 (A)와 (B)에 들어갈 말을 본문에서 찾아 쓰시오.\n\n필자는 일 때문에 너무 잦은 ( A ) 으로 인해 과거 경험을 ( B ) 하는 일이 생겼다.", cond:"(A), (B) 각각 영어 단어 1개로 쓸 것", model_answer:"(A) travel  /  (B) forgotten"},
+    {type:"서술형", q:"필자가 오슬로의 이전 방문을 기억해낸 계기와 그때 느낀 감정을 우리말로 서술하시오.", cond:"40자 내외로 쓸 것", model_answer:"주최자의 질문을 받고 몇 시간 후 기억이 떠올랐으며, 뭉크의 절규 속 인물처럼 소리치고 싶었다."},
+  ]
+}
+];
+
+// ══════════════════════════════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════════════════════════════
+let currentPassage = 0;
+let currentTab = 0;
+const circles = ['①','②','③','④','⑤'];
+
+// ══════════════════════════════════════════════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════════════════════════════════════════════
+function selectPassage(i) {
+  currentPassage = i;
+  currentTab = 0;
+  document.querySelectorAll('.passage-btn').forEach((b,j) => b.classList.toggle('active', j===i));
+  document.querySelectorAll('.tab-btn').forEach((b,j) => b.classList.toggle('active', j===0));
+  renderTab();
+}
+
+function selectTab(i) {
+  currentTab = i;
+  document.querySelectorAll('.tab-btn').forEach((b,j) => b.classList.toggle('active', j===i));
+  renderTab();
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// RENDER
+// ══════════════════════════════════════════════════════════════════════════════
+function renderTab() {
+  const p = passages[currentPassage];
+  const content = document.getElementById('content');
+  const renders = [renderSentences, renderKeywords, renderGrammar, renderTranslation, renderTopic, renderQuiz, renderWritten, renderAnswerKey];
+  content.innerHTML = renders[currentTab](p);
+}
+
+// ── TAB 1: 문장분석 ─────────────────────────────────────────────────────────
+function renderSentences(p) {
+  let h = `<div class="passage-box"><div class="label">전체 지문 — ${p.id} ${p.title}</div>${escHtml(p.full_en)}</div>`;
+  h += `<div class="section-title">상세 문장 분석</div>`;
+  p.sentences.forEach(s => {
+    h += `<div class="sent-card">
+      <div class="sent-header">
+        <div class="sent-num">${s.num}</div>
+        <div class="sent-en">${escHtml(s.en)}</div>
+      </div>
+      <div class="sent-body">
+        <div class="slash-row">
+          <div class="slash-label">직독직해</div>
+          <div class="slash-en">${escHtml(s.slash)}</div>
+          <div class="slash-ko">${escHtml(s.ko)}</div>
+        </div>
+        <ul class="grammar-list">`;
+    s.grammar.forEach(g => {
+      h += `<li><span class="g-label">[${escHtml(g.label)}]</span> &ensp;<span class="g-ex">예) ${escHtml(g.ex)}</span> &ensp;→ <span class="g-point">${escHtml(g.point)}</span></li>`;
+    });
+    h += `</ul></div></div>`;
+  });
+  return h;
+}
+
+// ── TAB 2: 핵심단어 ─────────────────────────────────────────────────────────
+function renderKeywords(p) {
+  let h = `<div class="section-title">핵심단어</div>
+  <table class="kw-table"><thead><tr><th>단어 / 표현</th><th>의미</th></tr></thead><tbody>`;
+  p.keywords.forEach(k => {
+    h += `<tr><td class="kw-en">${escHtml(k.word)}</td><td>${escHtml(k.meaning)}</td></tr>`;
+  });
+  h += `</tbody></table>`;
+  return h;
+}
+
+// ── TAB 3: 문법총정리 ────────────────────────────────────────────────────────
+function renderGrammar(p) {
+  let h = `<div class="section-title">문법총정리</div>`;
+  p.grammar_summary.forEach((g, i) => {
+    h += `<div class="gram-item">
+      <div class="gram-num">${i+1}.</div>
+      <div class="gram-title">${escHtml(g.title)}</div>
+      <div class="gram-evidence">본문 근거: ${escHtml(g.evidence)}</div>
+      <div class="gram-point">출제포인트: ${escHtml(g.point)}</div>
+    </div>`;
+  });
+  return h;
+}
+
+// ── TAB 4: 전문해석 ─────────────────────────────────────────────────────────
+function renderTranslation(p) {
+  return `<div class="section-title">전문해석</div>
+  <div class="trans-box">${escHtml(p.full_translation)}</div>`;
+}
+
+// ── TAB 5: 주제·구조 ─────────────────────────────────────────────────────────
+function renderTopic(p) {
+  const rows = [["주제", p.topic], ["주제문 (요지)", p.main_idea], ["구조", p.structure]];
+  let h = `<div class="section-title">주제·요지·구조</div><div class="topic-grid">`;
+  rows.forEach(([label, val]) => {
+    h += `<div class="topic-row"><div class="topic-label">${label}</div><div class="topic-val">${escHtml(val)}</div></div>`;
+  });
+  h += `</div>`;
+  return h;
+}
+
+// ── TAB 6: 변형문제 (interactive quiz) ─────────────────────────────────────
+function renderQuiz(p) {
+  let h = `<div class="section-title">변형문제</div>`;
+  p.questions.forEach((q, qi) => {
+    h += `<div class="quiz-item" id="quiz-${currentPassage}-${qi}">
+      <div class="quiz-header">
+        <div class="quiz-num">${qi+1}</div>
+        <div class="quiz-type">${q.type}</div>
+        <div class="quiz-q">${escHtml(q.q)}</div>
+      </div>
+      <div class="choices">`;
+    q.choices.forEach((c, ci) => {
+      h += `<button class="choice-btn" onclick="checkAnswer(${currentPassage},${qi},${ci})">${circles[ci]} ${escHtml(c)}</button>`;
+    });
+    h += `</div>
+      <div class="quiz-explanation" id="expl-${currentPassage}-${qi}">💡 ${escHtml(q.expl)}</div>
+      <button class="reset-btn" onclick="resetQuiz(${currentPassage},${qi})">↺ 초기화</button>
+    </div>`;
+  });
+  return h;
+}
+
+function checkAnswer(pi, qi, ci) {
+  const q = passages[pi].questions[qi];
+  const item = document.getElementById(`quiz-${pi}-${qi}`);
+  if (!item) return;
+  const btns = item.querySelectorAll('.choice-btn');
+  btns.forEach(b => b.classList.add('answered'));
+  if (ci === q.answer - 1) {
+    btns[ci].classList.add('correct');
+  } else {
+    btns[ci].classList.add('wrong');
+    btns[q.answer - 1].classList.add('correct');
+  }
+  const expl = document.getElementById(`expl-${pi}-${qi}`);
+  if (expl) expl.classList.add('visible');
+}
+
+function resetQuiz(pi, qi) {
+  const item = document.getElementById(`quiz-${pi}-${qi}`);
+  if (!item) return;
+  const btns = item.querySelectorAll('.choice-btn');
+  btns.forEach(b => { b.classList.remove('correct','wrong','answered'); });
+  const expl = document.getElementById(`expl-${pi}-${qi}`);
+  if (expl) expl.classList.remove('visible');
+}
+
+// ── TAB 7: 서술형 ────────────────────────────────────────────────────────────
+function renderWritten(p) {
+  let h = `<div class="section-title">서술형</div>`;
+  p.written_q.forEach((wq, wi) => {
+    h += `<div class="written-item">
+      <div class="written-type">${wq.type}</div>
+      <div class="written-q">${escHtml(wq.q)}</div>
+      <div class="written-cond">[조건] ${escHtml(wq.cond)}</div>
+      <div class="answer-lines">&nbsp;</div>
+      <div class="answer-lines">&nbsp;</div>
+    </div>`;
+  });
+  return h;
+}
+
+// ── TAB 8: 정답지 ────────────────────────────────────────────────────────────
+function renderAnswerKey(p) {
+  let h = `<div class="section-title">정답지 — 서술형 모범답안</div>`;
+  p.written_q.forEach((wq, wi) => {
+    h += `<div class="model-answer">
+      <div class="wtype">${wi+1}번 [${wq.type}]</div>
+      <div class="answer">${escHtml(wq.model_answer)}</div>
+    </div>`;
+  });
+  return h;
+}
+
+// ── UTIL ─────────────────────────────────────────────────────────────────────
+function escHtml(str) {
+  return String(str)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;');
+}
+
+// ── INIT ─────────────────────────────────────────────────────────────────────
+renderTab();
+</script>
+</body>
+</html>
